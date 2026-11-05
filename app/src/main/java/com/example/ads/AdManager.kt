@@ -3,6 +3,7 @@ package com.example.ads
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import com.example.BuildConfig
 import com.google.android.libraries.ads.mobile.sdk.MobileAds
 import com.google.android.libraries.ads.mobile.sdk.common.AdRequest
 import com.google.android.libraries.ads.mobile.sdk.common.AgeRestrictedTreatment
@@ -20,13 +21,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * AdMob IDs. These are Google's public TEST IDs.
- * Replace them with your own IDs before publishing the app.
+ * AdMob IDs. Debug builds always use Google's public TEST IDs (never click real ads yourself).
+ * Release builds use the real IDs.
+ * TODO: replace INTERSTITIAL_REAL with the real interstitial ad unit ID before publishing.
  */
 object AdIds {
-    const val APP_ID = "ca-app-pub-3940256099942544~3347511713"
-    const val BANNER = "ca-app-pub-3940256099942544/9214589741"
-    const val INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712"
+    private const val APP_ID_TEST = "ca-app-pub-3940256099942544~3347511713"
+    private const val BANNER_TEST = "ca-app-pub-3940256099942544/9214589741"
+    private const val INTERSTITIAL_TEST = "ca-app-pub-3940256099942544/1033173712"
+
+    private const val APP_ID_REAL = "ca-app-pub-1781215997226138~6619174738"
+    private const val BANNER_REAL = "ca-app-pub-1781215997226138/6427603043"
+    private const val INTERSTITIAL_REAL = "ca-app-pub-3940256099942544/1033173712"
+
+    val APP_ID: String = if (BuildConfig.DEBUG) APP_ID_TEST else APP_ID_REAL
+    val BANNER: String = if (BuildConfig.DEBUG) BANNER_TEST else BANNER_REAL
+    val INTERSTITIAL: String = if (BuildConfig.DEBUG) INTERSTITIAL_TEST else INTERSTITIAL_REAL
 }
 
 /**
