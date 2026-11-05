@@ -8,11 +8,12 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.asin
 import kotlin.math.sin
@@ -62,6 +63,9 @@ class ArcadeAudioManager(private val context: Context) : SoundManager {
 
     private val audioScope = CoroutineScope(Dispatchers.Default)
     private var musicJob: Job? = null
+
+    // Arcade chiptune loop, rendered once and reused on every start
+    private val musicPcm: ShortArray by lazy { ArcadeMusicSynth.render() }
 
     // Generates static PCM audio tone
     private fun playTone(
@@ -306,26 +310,50 @@ class ArcadeAudioManager(private val context: Context) : SoundManager {
         }
     }
 
-    /** Background cheerful nursery arcade music loop */
+    /** Upbeat arcade chiptune loop (150 BPM): pulse lead, triangle bass and drums. */
     override fun startBackgroundMusic() {
         if (!isMusicEnabled || musicJob?.isActive == true) return
 
         musicJob = audioScope.launch {
-            val melody = listOf(
-                523f to 200L, 659f to 200L, 784f to 200L, 659f to 200L,
-                880f to 200L, 784f to 200L, 659f to 350L,
-                587f to 200L, 659f to 200L, 587f to 200L, 523f to 400L,
-                659f to 200L, 784f to 200L, 880f to 200L, 1046f to 350L,
-                784f to 200L, 659f to 200L, 523f to 450L
-            )
+            var track: AudioTrack? = null
+            try {
+                val pcm = musicPcm
+                val newTrack = AudioTrack.Builder()
+                    .setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_GAME)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+                    .setAudioFormat(
+                        AudioFormat.Builder()
+                            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                            .setSampleRate(ArcadeMusicSynth.SAMPLE_RATE)
+                            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                            .build()
+                    )
+                    .setBufferSizeInBytes(pcm.size * 2)
+                    .setTransferMode(AudioTrack.MODE_STATIC)
+                    .build()
+                track = newTrack
 
-            while (isActive && isMusicEnabled) {
-                for ((freq, dur) in melody) {
-                    if (!isActive || !isMusicEnabled) break
-                    playTone(listOf(freq, freq * 0.5f), dur.toInt(), volume = 0.12f, waveType = 0)
-                    delay(dur + 30L)
+                newTrack.write(pcm, 0, pcm.size)
+                newTrack.setLoopPoints(0, pcm.size, -1)
+                newTrack.setVolume(0.55f)
+                newTrack.play()
+
+                awaitCancellation()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // Ignore audio errors gracefully
+            } finally {
+                try {
+                    track?.stop()
+                    track?.release()
+                } catch (_: Exception) {
+                    // Ignore release errors
                 }
-                delay(500L)
             }
         }
     }
