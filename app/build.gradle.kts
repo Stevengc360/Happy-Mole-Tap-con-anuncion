@@ -129,6 +129,8 @@ dependencies {
 
   // AdMob: Google Mobile Ads (GMA) Next-Gen SDK
   implementation("com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk:1.6.0")
+  // Google User Messaging Platform (EU consent form)
+  implementation("com.google.android.ump:user-messaging-platform:4.0.0")
 
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)

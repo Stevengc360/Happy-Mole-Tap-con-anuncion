@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.example.ads.AdManager
+import com.example.ads.ConsentManager
 import com.example.audio.ButtonClickPlayer
 import com.example.ui.components.BannerAdView
 import com.example.ui.screens.AchievementsScreen
@@ -42,7 +43,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        AdManager.initialize(applicationContext)
+        // Ads are initialized only after the user's consent status allows it.
+        ConsentManager.gatherConsent(this) {
+            AdManager.initialize(applicationContext)
+        }
 
         setContent {
             MyApplicationTheme(dynamicColor = false) {
