@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import com.google.android.libraries.ads.mobile.sdk.MobileAds
 import com.google.android.libraries.ads.mobile.sdk.common.AdRequest
+import com.google.android.libraries.ads.mobile.sdk.common.AgeRestrictedTreatment
 import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError
 import com.google.android.libraries.ads.mobile.sdk.common.PreloadConfiguration
 import com.google.android.libraries.ads.mobile.sdk.common.RequestConfiguration
@@ -51,11 +52,9 @@ object AdManager {
         // The SDK must be initialized on a background thread.
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // The game is aimed at children: request child-directed treatment.
+                // The game is aimed at children: request child age treatment.
                 val requestConfiguration = RequestConfiguration.Builder()
-                    .setTagForChildDirectedTreatment(
-                        RequestConfiguration.TagForChildDirectedTreatment.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE
-                    )
+                    .setAgeRestrictedTreatment(AgeRestrictedTreatment.CHILD)
                     .build()
 
                 MobileAds.initialize(
