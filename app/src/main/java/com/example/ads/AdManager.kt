@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 /**
  * AdMob IDs. Debug builds always use Google's public TEST IDs (never click real ads yourself).
  * Release builds use the real IDs.
- * TODO: replace INTERSTITIAL_REAL with the real interstitial ad unit ID before publishing.
  */
 object AdIds {
     private const val APP_ID_TEST = "ca-app-pub-3940256099942544~3347511713"
@@ -32,7 +31,7 @@ object AdIds {
 
     private const val APP_ID_REAL = "ca-app-pub-1781215997226138~6619174738"
     private const val BANNER_REAL = "ca-app-pub-1781215997226138/6427603043"
-    private const val INTERSTITIAL_REAL = "ca-app-pub-3940256099942544/1033173712"
+    private const val INTERSTITIAL_REAL = "ca-app-pub-1781215997226138/3761699220"
 
     val APP_ID: String = if (BuildConfig.DEBUG) APP_ID_TEST else APP_ID_REAL
     val BANNER: String = if (BuildConfig.DEBUG) BANNER_TEST else BANNER_REAL
