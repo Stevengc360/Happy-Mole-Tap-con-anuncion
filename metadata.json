@@ -1,0 +1,8 @@
+{
+  "name": "Remix Happy Mole Tap",
+  "description": "A vibrant, kid-friendly whack-a-mole game featuring intuitive controls, adjustable difficulty, and an engaging achievement system for young players.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
