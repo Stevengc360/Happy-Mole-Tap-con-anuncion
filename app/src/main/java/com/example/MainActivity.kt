@@ -8,12 +8,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,8 +24,13 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import com.example.ads.AdManager
 import com.example.ads.ConsentManager
 import com.example.audio.ButtonClickPlayer
@@ -79,6 +87,7 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 @Composable
 fun WhacAMoleApp(viewModel: GameViewModel) {
     val state by viewModel.uiState.collectAsState()
+    val privacyOptionsRequired by ConsentManager.privacyOptionsRequired.collectAsState()
     val clickPlayer = remember { ButtonClickPlayer() }
     val click: () -> Unit = { if (state.sfxEnabled) clickPlayer.play() }
 
@@ -133,6 +142,31 @@ fun WhacAMoleApp(viewModel: GameViewModel) {
                     onClaimPrize = { click(); viewModel.claimPrize(it) },
                     onBack = { click(); viewModel.navigateTo(AppScreen.MENU) }
                 )
+            }
+        }
+
+        // Privacy options entry point (required by Google when the consent form applies).
+        if (state.currentScreen == AppScreen.MENU && privacyOptionsRequired && activity != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFFFCC80)),
+                contentAlignment = Alignment.Center
+            ) {
+                TextButton(
+                    onClick = {
+                        click()
+                        ConsentManager.showPrivacyOptionsForm(activity)
+                    },
+                    modifier = Modifier.testTag("privacy_options_button")
+                ) {
+                    Text(
+                        text = "🔒 Opciones de privacidad",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF6D4C41)
+                    )
+                }
             }
         }
 
