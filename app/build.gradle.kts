@@ -13,7 +13,7 @@ android {
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.golpeatopo.zptmrl"
+    applicationId = "com.aistudio.golpeatopo.wacmle"
     minSdk = 24
     targetSdk = 36
     versionCode = 1
@@ -126,6 +126,10 @@ dependencies {
   implementation(libs.okhttp)
   // implementation(libs.play.services.location)
   implementation(libs.retrofit)
+
+  // AdMob: Google Mobile Ads (GMA) Next-Gen SDK
+  implementation("com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk:1.6.0")
+
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)
   testImplementation(libs.androidx.junit)
