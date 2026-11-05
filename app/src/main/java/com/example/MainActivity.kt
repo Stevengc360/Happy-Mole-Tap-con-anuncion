@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -32,10 +33,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.ads.AdManager
+import com.example.ads.AgeGate
 import com.example.ads.ConsentManager
 import com.example.audio.ButtonClickPlayer
 import com.example.ui.components.BannerAdView
 import com.example.ui.screens.AchievementsScreen
+import com.example.ui.screens.AgeGateScreen
 import com.example.ui.screens.GameScreen
 import com.example.ui.screens.MainMenuScreen
 import com.example.ui.screens.PrizesScreen
@@ -46,24 +49,43 @@ import com.example.viewmodel.GameViewModel
 class MainActivity : ComponentActivity() {
 
     private val viewModel: GameViewModel by viewModels()
+    private var consentStarted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Ads are initialized only after the user's consent status allows it.
-        ConsentManager.gatherConsent(this) {
-            AdManager.initialize(applicationContext)
-        }
+        // Ads start only after the age screen was answered and the consent status allows it.
+        if (AgeGate.isAnswered(this)) startConsent()
 
         setContent {
             MyApplicationTheme(dynamicColor = false) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     Box(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
-                        WhacAMoleApp(viewModel = viewModel)
+                        var ageAnswered by remember {
+                            mutableStateOf(AgeGate.isAnswered(this@MainActivity))
+                        }
+                        if (ageAnswered) {
+                            WhacAMoleApp(viewModel = viewModel)
+                        } else {
+                            AgeGateScreen(onConfirm = { year ->
+                                AgeGate.saveBirthYear(this@MainActivity, year)
+                                ageAnswered = true
+                                startConsent()
+                            })
+                        }
                     }
                 }
             }
+        }
+    }
+
+    private fun startConsent() {
+        if (consentStarted) return
+        consentStarted = true
+        val restricted = AgeGate.isRestricted(this)
+        ConsentManager.gatherConsent(this, restricted) {
+            AdManager.initialize(applicationContext, restricted)
         }
     }
 

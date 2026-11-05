@@ -44,7 +44,8 @@ object AdManager {
 
     private var initStarted = false
 
-    fun initialize(context: Context) {
+    /** [restricted] is true for minors (from the age screen): child-directed ad treatment. */
+    fun initialize(context: Context, restricted: Boolean) {
         if (initStarted) return
         initStarted = true
         val appContext = context.applicationContext
@@ -52,10 +53,13 @@ object AdManager {
         // The SDK must be initialized on a background thread.
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // The game is aimed at children: request child age treatment.
-                val requestConfiguration = RequestConfiguration.Builder()
-                    .setAgeRestrictedTreatment(AgeRestrictedTreatment.CHILD)
-                    .build()
+                val requestConfiguration = if (restricted) {
+                    RequestConfiguration.Builder()
+                        .setAgeRestrictedTreatment(AgeRestrictedTreatment.CHILD)
+                        .build()
+                } else {
+                    RequestConfiguration.Builder().build()
+                }
 
                 MobileAds.initialize(
                     appContext,

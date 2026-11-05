@@ -25,14 +25,17 @@ object ConsentManager {
     /** True when the app must offer the user an entry point to change their privacy choices. */
     val privacyOptionsRequired: StateFlow<Boolean> = _privacyOptionsRequired.asStateFlow()
 
-    /** Gathers consent and calls [onCanRequestAds] once (and only once) ads may be requested. */
-    fun gatherConsent(activity: Activity, onCanRequestAds: () -> Unit) {
+    /**
+     * Gathers consent and calls [onCanRequestAds] once (and only once) ads may be requested.
+     * [underAge] comes from the neutral age screen.
+     */
+    fun gatherConsent(activity: Activity, underAge: Boolean, onCanRequestAds: () -> Unit) {
         val info = UserMessagingPlatform.getConsentInformation(activity)
         consentInformation = info
         refreshPrivacyOptions(info)
 
         val params = ConsentRequestParameters.Builder()
-            .setTagForUnderAgeOfConsent(true) // the game is aimed at children
+            .setTagForUnderAgeOfConsent(underAge)
             .build()
 
         // Must be called on every app launch.
